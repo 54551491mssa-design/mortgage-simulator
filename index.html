@@ -245,6 +245,10 @@
         <label>返済期間（年）</label>
         <input type="number" id="in-term" value="35">
       </div>
+      <div class="input-group">
+        <label>現在の年齢（歳）</label>
+        <input type="number" id="in-age" value="35" min="18" max="80">
+      </div>
       <button class="calc-btn" onclick="calculate()">再計算</button>
     </div>
 
@@ -380,7 +384,7 @@
       <table>
         <thead>
           <tr>
-            <th>経過年</th>
+            <th>経過年（年齢）</th>
             <th>適用金利</th>
             <th>年間返済額</th>
             <th>うち元金</th>
@@ -719,6 +723,7 @@ function calculate() {
   document.getElementById('cmp-genkin').className  = 'compare-box' + (method === 'genkin'  ? ' active-method' : '');
 
   // ----- YEAR TABLE -----
+  const currentAge = parseInt(document.getElementById('in-age').value) || 35;
   const tbody = document.getElementById('year-table');
   tbody.innerHTML = '';
   const yearData = [];
@@ -737,7 +742,7 @@ function calculate() {
       ? `<td class="bonus-td">${yBonus > 0 ? fmtMan1(yBonus) : '—'}</td>` : '';
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${y+1}年目</td>
+      <td>${y+1}年目<br><span style="font-size:11px;color:#3182ce;font-weight:600;">${currentAge + y + 1}歳</span></td>
       <td style="text-align:center;"><span class="rate-badge">${(rate*100).toFixed(2)}%</span></td>
       <td>${fmtMan1(yTotal)}</td>
       <td>${fmtMan1(yPrin + yBonus)}</td>
@@ -753,6 +758,7 @@ function calculate() {
   for (let y = 5; y <= years; y += 5) checkpoints.push(y);
   const ms = document.getElementById('milestones');
   ms.innerHTML = '';
+  const currentAgeMs = parseInt(document.getElementById('in-age').value) || 35;
   checkpoints.forEach(y => {
     const idx = Math.min(y*12-1, monthly.length-1);
     const bal = monthly[idx]?.balance ?? 0;
@@ -760,7 +766,7 @@ function calculate() {
     const pct = ((paid/P)*100).toFixed(0);
     ms.innerHTML += `
       <div class="milestone">
-        <div class="m-year">${y}年後</div>
+        <div class="m-year">${y}年後（${currentAgeMs + y}歳）</div>
         <div class="m-remaining">${Math.round(bal/10000).toLocaleString()}万円</div>
         <div class="m-paid">返済済 ${Math.round(paid/10000).toLocaleString()}万円</div>
         <div class="m-progress"><div class="m-bar" style="width:${pct}%"></div></div>
@@ -865,12 +871,13 @@ function drawStackedChart(yearData, years, P, bonusOn) {
     ctx.strokeStyle = 'white'; ctx.lineWidth = 1.5; ctx.stroke();
   }
 
-  // x labels
+  // x labels (年齢表示)
+  const currentAge = parseInt(document.getElementById('in-age').value) || 35;
   ctx.fillStyle = '#718096'; ctx.font = '10px Helvetica Neue, Arial, sans-serif'; ctx.textAlign = 'center';
   const li = yearData.length <= 15 ? 1 : 5;
   for (let i = 0; i < yearData.length; i++) {
     if ((i+1) % li === 0 || i === 0) {
-      ctx.fillText((i+1) + '年', PAD.left + i*(barW+gap) + barW/2, PAD.top + cH + 16);
+      ctx.fillText((currentAge + i + 1) + '歳', PAD.left + i*(barW+gap) + barW/2, PAD.top + cH + 16);
     }
   }
 
